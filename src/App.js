@@ -11,34 +11,41 @@ import Map from "../src/Map";
 
 class App extends Component {
     state = {
-//        center: {
-//          lat: 54.083,
-//          lng: 15.017
-//        },
-//        zoom: 11,
+        results: [],
         open: false
     };
 
+
+    componentDidMount() {
+        console.log();
+    }
 
 
     toggleClass() {
         let currentState = this.state.open;
         this.setState({ open: !currentState });
     };
+
+    loadMarkers = results => {
+        this.setState({
+            results: results
+        });
+    };
     
   render() {
-      let { open } = this.state;
+      let { open, results } = this.state;
       
     return (
       <div id="container">
+
         {/* Navigation component */}
-           <Navigation onToggleClass={() => this.toggleClass()} />
+        <Navigation onToggleClass={() => this.toggleClass()} />
             
          {/* Map component */}
-           <Map />
+         <Map onUpdateMap={(resultArray) => this.loadMarkers(resultArray)} />
             
         {/* Sidebar component */}
-        <Sidebar open={open} onToggleClass={() => this.toggleClass()}/>
+        <Sidebar open={open} onToggleClass={() => this.toggleClass()} results={results}/>
             
       </div>
     );

@@ -1,7 +1,4 @@
 import React, { Component } from 'react';
-import GoogleMapReact from 'google-map-react';
-
-const AnyReactComponent = ({ text }) => <div>dsadsadas</div>;
 
 class Navigation extends Component {
     state = {
@@ -12,14 +9,17 @@ class Navigation extends Component {
         place_location: '',
         results: []
         
-    }
+    };
     
     
     componentDidMount() {
-        var map;
-        var infowindow;
-        var mapHotel = {lat:  54.0813087, lng: 15.0157938 };
-        var resultArray = [];
+        let self = this;
+        let map;
+        let infowindow;
+        let mapHotel = {lat:  54.0813087, lng: 15.0157938 };
+        let resultArray = [];
+
+
 
         map = new window.google.maps.Map(document.getElementById('map'), {
           center: mapHotel,
@@ -27,7 +27,8 @@ class Navigation extends Component {
         });
 
         infowindow = new window.google.maps.InfoWindow();
-        var service = new window.google.maps.places.PlacesService(map);
+
+        let service = new window.google.maps.places.PlacesService(map);
         service.nearbySearch({
           location: mapHotel,
           radius: 800,
@@ -36,21 +37,21 @@ class Navigation extends Component {
 
       function callback(results, status) {
         if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-          for (var i = 0; i < results.length; i++) {
+          for (let i = 0; i < results.length; i++) {
             createMarker(results[i]);
               resultArray.push(results[i]);
           }
         }
+        self.props.onUpdateMap(resultArray);
       }
-        console.log(resultArray);
-        this.setState({
-            results: resultArray
-        })
-        console.log(this.state.results)
+      
+      this.setState({ results: resultArray });
+
+
 
       function createMarker(place) {
-        var placeLoc = place.geometry.location;
-        var marker = new window.google.maps.Marker({
+        let placeLoc = place.geometry.location;
+        let marker = new window.google.maps.Marker({
           map: map,
           position: place.geometry.location
         });
@@ -59,14 +60,27 @@ class Navigation extends Component {
           infowindow.setContent(place.name);
           infowindow.open(map, this);
         });
-      }    
+      }
+
+
+        var NewMapCenter = map.getCenter();
+        var latitude = NewMapCenter.lat();
+        var longitude = NewMapCenter.lng();
+
+        console.log(latitude);
   }
 
+    handleMove() {
+
+    }
+
   render() {
-    return (
+      let { onUpdateMap} = this.props;
+
+      return (
         <div id='app'>
-        <div id='map' />
-      </div>
+            <div id='map' onChange={(resultArray) => onUpdateMap(resultArray)} onTouchEnd={this.handleMove} onMouseUp={this.handleMove} />
+        </div>
     );
   }
 }
