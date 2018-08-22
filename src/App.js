@@ -20,6 +20,8 @@ class App extends Component {
         console.log();
     }
 
+conso
+
 
     toggleClass() {
         let currentState = this.state.open;
