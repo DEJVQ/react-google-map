@@ -12,7 +12,9 @@ class Navigation extends Component {
         maplattitude: 15.0157938,
         searchLocation: {lat:  54.0813087, lng: 15.0157938 },
         map: "",
-        service: ""
+        service: "",
+        marker: "",
+        markers: []
     };
     
     componentDidMount() {
@@ -58,35 +60,27 @@ class Navigation extends Component {
       
       this.setState({ results: resultArray });
 
-
-
       function createMarker(place) {
         let placeLoc = place.geometry.location;
         let marker = new window.google.maps.Marker({
           map: map,
           position: place.geometry.location
         });
+          self.setState({marker: marker});
+          self.setState({markers: [...self.state.markers, ...[self.state.marker]]});
 
         window.google.maps.event.addListener(marker, 'click', function() {
           infowindow.setContent(place.name);
           infowindow.open(map, this);
         });
       }
-
-//        map.setCenter(new window.google.maps.LatLng(54.0813087, 15.0257938));
-        
         
         this.setState({
             service: service
           })
-//        var NewMapCenter = map.getCenter();
-//        var latitude = NewMapCenter.lat();
-//        var longitude = NewMapCenter.lng();
-        
   }
 
     handleMove = () => {
-//        this.state.map.setCenter(new window.google.maps.LatLng(54.0813087, 15.0257938));
         
         var NewMapCenter = this.state.map.getCenter();
         var latitude = NewMapCenter.lat();
@@ -98,21 +92,23 @@ class Navigation extends Component {
             searchLocation: {lat: latitude, lng: longitude}
         });
         
+        
+        for(let i = 0; i < this.state.markers.length; i ++) {
+            this.state.markers[i].setMap(null)
+        }
+        
         console.log(this.state.searchLocation);
         
-        
         // Nearby Search
-        
-        
         var resultArray = [];
         var self = this;
         var infowindow;
         
         this.state.service.nearbySearch({
-                  location: this.state.searchLocation,
-                  radius: 800,
-                  type: ['hotel']
-                }, callback);
+          location: this.state.searchLocation,
+          radius: 800,
+          type: ['hotel']
+        }, callback);
 
               function callback(results, status) {
                 if (status === window.google.maps.places.PlacesServiceStatus.OK) {
@@ -126,37 +122,37 @@ class Navigation extends Component {
 
               this.setState({ results: resultArray });
 
-
-
               function createMarker(place) {
+                  console.log(self.state.marker);
                 let placeLoc = place.geometry.location;
-                let marker = new window.google.maps.Marker({
+                self.state.marker = new window.google.maps.Marker({
                   map: self.state.map,
                   position: place.geometry.location
                 });
-
-                window.google.maps.event.addListener(marker, 'click', function() {
+                  
+                self.setState({markers: [...self.state.markers, ...[self.state.marker]]});
+                  
+                  if(self.state.markers.length > 20) {
+                        for(let i = 0; i < self.state.markers.length-10; i ++) {
+                            self.state.markers[i].setMap(null)
+                        }
+                  }
+                  
+                  
+                window.google.maps.event.addListener(self.state.marker, 'click', function() {
                   infowindow.setContent(place.name);
                   infowindow.open(this.state.map, this);
                 });
-              }
-        
-        
-        
-        
-        
+        }        
     }
 
 
   render() {
       let { onUpdateMap} = this.props;
       
-//      console.log(this.state.map)
-//      console.log(this.state.service)
-
       return (
         <div id='app'>
-            <div id='map' onChange={(resultArray) => onUpdateMap(resultArray)} onTouchEnd={() => this.handleMove()} onMouseUp={this.handleMove} />
+            <div id='map' onChange={(resultArray) => onUpdateMap(resultArray)} onTouchEnd={() => this.handleMove()} onDragStart={this.handleMove} draggable/>
         </div>
     );
   }

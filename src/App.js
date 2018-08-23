@@ -12,16 +12,14 @@ import Map from "../src/Map";
 class App extends Component {
     state = {
         results: [],
-        open: false
+        open: false,
+        query: ""
     };
 
 
     componentDidMount() {
         console.log();
     }
-
-conso
-
 
     toggleClass() {
         let currentState = this.state.open;
@@ -33,9 +31,27 @@ conso
             results: results
         });
     };
+
+    updateQuery = query => {
+        var self = this;
+        this.setState({ query: query.trim() });
+        if(query !== "") {
+            var filterResults = this.state.results.filter(function(place){
+                if (self.state.query !== "") {
+                    return place.name.match(self.state.query);
+                }
+            });
+        }
+        
+        if(typeof filterResults !== "undefined" && filterResults.length > 0) {
+            this.setState({
+                results: filterResults
+            });
+        }
+    }
     
   render() {
-      let { open, results } = this.state;
+      let { open, results, searchQuery, query } = this.state;
       
     return (
       <div id="container">
@@ -47,7 +63,7 @@ conso
          <Map onUpdateMap={(resultArray) => this.loadMarkers(resultArray)} />
             
         {/* Sidebar component */}
-        <Sidebar open={open} onToggleClass={() => this.toggleClass()} results={results}/>
+        <Sidebar open={open} onToggleClass={() => this.toggleClass()} results={results} onUpdateQuery={(event) => this.updateQuery(event)} query={query}/>
             
       </div>
     );
