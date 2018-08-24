@@ -45,7 +45,7 @@ class Navigation extends Component {
         service.nearbySearch({
           location: this.state.searchLocation,
           radius: 800,
-          type: ['hotel']
+          type: ["establishment"]
         }, callback);
 
       function callback(results, status) {
@@ -70,8 +70,8 @@ class Navigation extends Component {
           self.setState({markers: [...self.state.markers, ...[self.state.marker]]});
 
         window.google.maps.event.addListener(marker, 'click', function() {
-          infowindow.setContent(place.name);
-          infowindow.open(map, this);
+          infowindow.setContent(`<strong>${place.name}</strong> <br> ${place.vicinity}`);
+          infowindow.open(self.state.map, this);
         });
       }
         
@@ -86,7 +86,8 @@ class Navigation extends Component {
         var latitude = NewMapCenter.lat();
         var longitude = NewMapCenter.lng();
         
-        console.log(latitude + " , " + longitude);
+//        console.log(latitude + " , " + longitude);
+        infowindow = new window.google.maps.InfoWindow();
         
         this.setState({
             searchLocation: {lat: latitude, lng: longitude}
@@ -97,8 +98,6 @@ class Navigation extends Component {
             this.state.markers[i].setMap(null)
         }
         
-        console.log(this.state.searchLocation);
-        
         // Nearby Search
         var resultArray = [];
         var self = this;
@@ -107,13 +106,14 @@ class Navigation extends Component {
         this.state.service.nearbySearch({
           location: this.state.searchLocation,
           radius: 800,
-          type: ['hotel']
+          type: ["establishment"]
         }, callback);
 
               function callback(results, status) {
                 if (status === window.google.maps.places.PlacesServiceStatus.OK) {
                   for (let i = 0; i < results.length; i++) {
                     createMarker(results[i]);
+//                      console.log(results[i]);
                       resultArray.push(results[i]);
                   }
                 }
@@ -121,9 +121,12 @@ class Navigation extends Component {
               }
 
               this.setState({ results: resultArray });
+        
+//                for(let i = 0; i < this.state.results.length; i++) {
+//                    createMarker(this.state.results[i]);
+//                }
 
               function createMarker(place) {
-                  console.log(self.state.marker);
                 let placeLoc = place.geometry.location;
                 self.state.marker = new window.google.maps.Marker({
                   map: self.state.map,
@@ -132,23 +135,53 @@ class Navigation extends Component {
                   
                 self.setState({markers: [...self.state.markers, ...[self.state.marker]]});
                   
+//                  console.log(self.state.markers)
+                  
                   if(self.state.markers.length > 20) {
-                        for(let i = 0; i < self.state.markers.length-10; i ++) {
+                        for(let i = 0; i < self.state.markers.length-10; i++) {
                             self.state.markers[i].setMap(null)
                         }
                   }
                   
                   
                 window.google.maps.event.addListener(self.state.marker, 'click', function() {
-                  infowindow.setContent(place.name);
-                  infowindow.open(this.state.map, this);
+                    console.log(place);
+                    console.log(self.state.map);
+                  infowindow.setContent(`<strong>${place.name}</strong> <br> ${place.vicinity}`);
+                  infowindow.open(self.state.map, this);
                 });
         }        
+    }
+    
+    getAlert(result) {
+        console.log(result);
+        
+        for(let i = 0; i < this.state.markers.length; i++) {
+            this.state.markers[i].setMap(null)
+            this.setState({
+                markers: []
+            });
+        }
+        new window.google.maps.Marker({
+                map: this.state.map,
+                position: result.geometry.location
+            })
+        
+        
+//        console.log(this.props.resultsFiltered)
+//        console.log(this.state.markers)
+//        for(let i = 0; i < this.props.resultsFiltered.length; i++) {
+//            new window.google.maps.Marker({
+//                map: this.state.map,
+//                position: this.props.resultsFiltered[i].geometry.location
+//            })
+//            
+//        }
     }
 
 
   render() {
-      let { onUpdateMap} = this.props;
+      let { onUpdateMap, resultsFiltered} = this.props;
       
       return (
         <div id='app'>

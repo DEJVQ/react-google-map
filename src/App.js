@@ -13,13 +13,15 @@ class App extends Component {
     state = {
         results: [],
         open: false,
-        query: ""
+        query: "",
+//        clickedResult: ""
     };
-
-
-    componentDidMount() {
-        console.log();
+    
+    props = {
+        clickedResult: ""
     }
+
+    child = React.createRef();
 
     toggleClass() {
         let currentState = this.state.open;
@@ -46,7 +48,27 @@ class App extends Component {
         if(typeof filterResults !== "undefined" && filterResults.length > 0) {
             this.setState({
                 results: filterResults
-            });
+            });   
+        }
+        
+        console.log(this.state.results)
+        
+        this.child.current.getAlert();
+    }
+    
+    setOnMap = result => {
+        console.log(result.getAttribute("id"));
+        var clickedResult = result.getAttribute("id")
+        
+        console.log(this.state.results);
+        console.log(this.state.clickedResult);
+        
+        for (let i = 1; i < this.state.results.length; i++) {
+//            console.log(this.state.results[i].id)
+            if(this.state.results[i].id === clickedResult) {
+                console.log(this.state.results[i])
+                this.child.current.getAlert(this.state.results[i]);
+            }
         }
     }
     
@@ -60,10 +82,10 @@ class App extends Component {
         <Navigation onToggleClass={() => this.toggleClass()} />
             
          {/* Map component */}
-         <Map onUpdateMap={(resultArray) => this.loadMarkers(resultArray)} />
+         <Map onUpdateMap={(resultArray) => this.loadMarkers(resultArray)} ref={this.child} resultsFiltered={results} />
             
         {/* Sidebar component */}
-        <Sidebar open={open} onToggleClass={() => this.toggleClass()} results={results} onUpdateQuery={(event) => this.updateQuery(event)} query={query}/>
+        <Sidebar open={open} onToggleClass={() => this.toggleClass()} results={results} onUpdateQuery={(event) => this.updateQuery(event)} query={query} onSetOnMap={(result) => this.setOnMap(result)}/>
             
       </div>
     );
