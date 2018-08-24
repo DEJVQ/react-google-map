@@ -4,12 +4,7 @@ class Navigation extends Component {
     state = {
         zoom: 15,
         maptype: 'roadmap',
-        place_formatted: '',
-        place_id: '',
-        place_location: '',
         results: [],
-        maplongtitude: 54.0813087,
-        maplattitude: 15.0157938,
         searchLocation: {lat:  54.0813087, lng: 15.0157938 },
         map: "",
         service: "",
@@ -17,6 +12,8 @@ class Navigation extends Component {
         markers: []
     };
     
+
+    // Map initialization
     componentDidMount() {
         
         var self = this;
@@ -25,8 +22,6 @@ class Navigation extends Component {
         var infowindow;
         var mapHotel = {lat:  54.0813087, lng: 15.0157938 };
         var resultArray = [];
-
-
 
         map = new window.google.maps.Map(document.getElementById('map'), {
           center: this.state.searchLocation,
@@ -79,20 +74,19 @@ class Navigation extends Component {
             service: service
           })
   }
-
+    
+    // Make this on Map move
     handleMove = () => {
         
         var NewMapCenter = this.state.map.getCenter();
         var latitude = NewMapCenter.lat();
         var longitude = NewMapCenter.lng();
         
-//        console.log(latitude + " , " + longitude);
         infowindow = new window.google.maps.InfoWindow();
         
         this.setState({
             searchLocation: {lat: latitude, lng: longitude}
         });
-        
         
         for(let i = 0; i < this.state.markers.length; i ++) {
             this.state.markers[i].setMap(null)
@@ -103,57 +97,51 @@ class Navigation extends Component {
         var self = this;
         var infowindow;
         
+        // Search for hotels
         this.state.service.nearbySearch({
           location: this.state.searchLocation,
           radius: 800,
           type: ["establishment"]
         }, callback);
 
-              function callback(results, status) {
-                if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-                  for (let i = 0; i < results.length; i++) {
-                    createMarker(results[i]);
-//                      console.log(results[i]);
-                      resultArray.push(results[i]);
-                  }
-                }
-                self.props.onUpdateMap(resultArray);
+          function callback(results, status) {
+            if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+              for (let i = 0; i < results.length; i++) {
+                createMarker(results[i]);
+                  resultArray.push(results[i]);
+              }
+            }
+            self.props.onUpdateMap(resultArray);
+          }
+
+            this.setState({ results: resultArray });
+
+          function createMarker(place) {
+            let placeLoc = place.geometry.location;
+            self.state.marker = new window.google.maps.Marker({
+              map: self.state.map,
+              position: place.geometry.location
+            });
+               
+            // Add markers to marker array of states
+            self.setState({markers: [...self.state.markers, ...[self.state.marker]]});
+
+              if(self.state.markers.length > 20) {
+                    for(let i = 0; i < self.state.markers.length-10; i++) {
+                        self.state.markers[i].setMap(null)
+                    }
               }
 
-              this.setState({ results: resultArray });
-        
-//                for(let i = 0; i < this.state.results.length; i++) {
-//                    createMarker(this.state.results[i]);
-//                }
-
-              function createMarker(place) {
-                let placeLoc = place.geometry.location;
-                self.state.marker = new window.google.maps.Marker({
-                  map: self.state.map,
-                  position: place.geometry.location
-                });
-                  
-                self.setState({markers: [...self.state.markers, ...[self.state.marker]]});
-                  
-//                  console.log(self.state.markers)
-                  
-                  if(self.state.markers.length > 20) {
-                        for(let i = 0; i < self.state.markers.length-10; i++) {
-                            self.state.markers[i].setMap(null)
-                        }
-                  }
-                  
-                  
-                window.google.maps.event.addListener(self.state.marker, 'click', function() {
-                    console.log(place);
-                    console.log(self.state.map);
-                  infowindow.setContent(`<strong>${place.name}</strong> <br> ${place.vicinity}`);
-                  infowindow.open(self.state.map, this);
-                });
+            // Fire event open infowindow on click certain marker
+            window.google.maps.event.addListener(self.state.marker, 'click', function() {
+              infowindow.setContent(`<strong>${place.name}</strong> <br> ${place.vicinity}`);
+              infowindow.open(self.state.map, this);
+            });
         }        
     }
     
-    getAlert(result) {
+    // Set clicked Marker on Map
+    setMarkeronMap(result) {
         console.log(result);
         
         for(let i = 0; i < this.state.markers.length; i++) {
@@ -162,21 +150,24 @@ class Navigation extends Component {
                 markers: []
             });
         }
-        new window.google.maps.Marker({
+        let marker = new window.google.maps.Marker({
                 map: this.state.map,
                 position: result.geometry.location
             })
         
+        this.setState({marker: marker});        
+        this.setState({markers: [...this.state.markers, ...[this.state.marker]]});
+
+        var infowindow = new window.google.maps.InfoWindow();
         
-//        console.log(this.props.resultsFiltered)
-//        console.log(this.state.markers)
-//        for(let i = 0; i < this.props.resultsFiltered.length; i++) {
-//            new window.google.maps.Marker({
-//                map: this.state.map,
-//                position: this.props.resultsFiltered[i].geometry.location
-//            })
-//            
-//        }
+        
+        // This is repeated in 3 functions / Set Infowindow to certain marker
+        window.google.maps.event.addListener(this.state.marker, 'click', function() {
+            console.log(result);
+            console.log(this.state.map);
+          infowindow.setContent(`<strong>${result.name}</strong> <br> ${result.vicinity}`);
+          infowindow.open(this.state.map, this);
+        });
     }
 
 

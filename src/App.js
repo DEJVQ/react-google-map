@@ -7,33 +7,32 @@ import Navigation from "../src/Navigation";
 import Sidebar from "../src/Sidebar";
 import Map from "../src/Map";
 
-//const AnyReactComponent = ({ text }) => <div>{text}</div>;
 
 class App extends Component {
     state = {
         results: [],
         open: false,
         query: "",
-//        clickedResult: ""
     };
-    
-    props = {
-        clickedResult: ""
-    }
 
+    // Create reference / to run function inside Map
     child = React.createRef();
 
+    // Toggle class for navigation menu
     toggleClass() {
         let currentState = this.state.open;
         this.setState({ open: !currentState });
     };
 
+    // Assing markers to state results
     loadMarkers = results => {
         this.setState({
             results: results
         });
     };
 
+
+    // Filter Map by given query in search box
     updateQuery = query => {
         var self = this;
         this.setState({ query: query.trim() });
@@ -50,24 +49,18 @@ class App extends Component {
                 results: filterResults
             });   
         }
-        
-        console.log(this.state.results)
-        
-        this.child.current.getAlert();
     }
     
+    // Get clicked element and set on map one Marker
     setOnMap = result => {
-        console.log(result.getAttribute("id"));
-        var clickedResult = result.getAttribute("id")
+        var clickedResult = result.getAttribute("id");
         
-        console.log(this.state.results);
-        console.log(this.state.clickedResult);
+//        console.log(this.state.results);
+//        console.log(this.state.clickedResult);
         
         for (let i = 1; i < this.state.results.length; i++) {
-//            console.log(this.state.results[i].id)
             if(this.state.results[i].id === clickedResult) {
-                console.log(this.state.results[i])
-                this.child.current.getAlert(this.state.results[i]);
+                this.child.current.setMarkeronMap(this.state.results[i]);
             }
         }
     }

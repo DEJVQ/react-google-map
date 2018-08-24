@@ -5,9 +5,6 @@ class Sidebar extends Component {
     
   render() {
       let { onToggleClass, results, onUpdateQuery, query, onSetOnMap} = this.props;
-
-      
-      
       
     return (
         <div className={this.props.open ? "sidebar" : "sidebar sidebar--close"}>
@@ -21,7 +18,7 @@ class Sidebar extends Component {
                     {results.map((result) => (
                         <li key={result.id} className="sidebar__result" id={result.id} onClick={(result) => onSetOnMap(result.target)}>
                             <p id={result.id}>Hotel name: <span>{result.name}</span></p>
-                            <p>Address: <span>{result.vicinity}</span></p>
+                            <p id={result.id}>Address: <span>{result.vicinity}</span></p>
                         </li>
                     ))}
                 </ol>
